@@ -1,5 +1,6 @@
 {
   "alexa_skill_id": "amzn1.ask.skill.paste-your-skill-id-here",
+  "endpoint_secret": "",
   "default_room": "Living Room",
   "rooms": {
     "Living Room": {
