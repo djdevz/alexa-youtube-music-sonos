@@ -1,0 +1,14 @@
+[Unit]
+Description=Carrot - Alexa to YouTube Music on Sonos
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/carrot
+ExecStart=/home/pi/carrot/.venv/bin/python /home/pi/carrot/server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,203 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "carrot",
+      "intents": [
+        {
+          "name": "PlayIntent",
+          "slots": [
+            {
+              "name": "query",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "play {query}",
+            "to play {query}",
+            "put on {query}",
+            "to put on {query}",
+            "put {query} on",
+            "to put {query} on",
+            "for {query}",
+            "start {query}",
+            "to start {query}",
+            "queue up {query}",
+            "to queue up {query}",
+            "throw on {query}",
+            "to throw on {query}",
+            "i want to hear {query}",
+            "listen to {query}",
+            "shuffle {query}",
+            "to shuffle {query}"
+          ]
+        },
+        {
+          "name": "PauseIntent",
+          "slots": [
+            {
+              "name": "room",
+              "type": "ROOM"
+            }
+          ],
+          "samples": [
+            "pause",
+            "to pause",
+            "pause the music",
+            "to pause the music",
+            "stop the music",
+            "to stop the music",
+            "stop music",
+            "to stop music",
+            "stop playing",
+            "to stop playing",
+            "turn it off",
+            "to turn it off",
+            "turn the music off",
+            "to turn the music off",
+            "music off",
+            "be quiet",
+            "pause the {room}",
+            "to pause the {room}",
+            "pause music in the {room}",
+            "stop the music in the {room}",
+            "to stop the music in the {room}",
+            "stop the {room}",
+            "to stop the {room}",
+            "turn off the {room}",
+            "to turn off the {room}"
+          ]
+        },
+        {
+          "name": "ResumeIntent",
+          "slots": [
+            {
+              "name": "room",
+              "type": "ROOM"
+            }
+          ],
+          "samples": [
+            "resume",
+            "to resume",
+            "carry on",
+            "to carry on",
+            "unpause",
+            "to unpause",
+            "resume the music",
+            "to resume the music",
+            "resume the {room}",
+            "resume music in the {room}",
+            "to resume the {room}"
+          ]
+        },
+        {
+          "name": "NextIntent",
+          "slots": [
+            {
+              "name": "room",
+              "type": "ROOM"
+            }
+          ],
+          "samples": [
+            "skip",
+            "to skip",
+            "skip this",
+            "to skip this",
+            "skip this song",
+            "to skip this song",
+            "skip the song",
+            "to skip the song",
+            "skip track",
+            "next track",
+            "play the next song",
+            "to play the next song",
+            "go to the next song",
+            "to go to the next song",
+            "skip in the {room}",
+            "to skip in the {room}",
+            "skip the song in the {room}",
+            "next song in the {room}"
+          ]
+        },
+        {
+          "name": "PreviousIntent",
+          "slots": [
+            {
+              "name": "room",
+              "type": "ROOM"
+            }
+          ],
+          "samples": [
+            "go back",
+            "to go back",
+            "go back a song",
+            "to go back a song",
+            "previous track",
+            "play the last song again",
+            "to play the last song again",
+            "play the previous song",
+            "to play the previous song",
+            "replay that",
+            "to replay that",
+            "go back in the {room}",
+            "to go back in the {room}",
+            "play the previous song in the {room}"
+          ]
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        }
+      ],
+      "types": [
+        {
+          "name": "ROOM",
+          "values": [
+            {
+              "name": {
+                "value": "living room",
+                "synonyms": [
+                  "lounge",
+                  "front room",
+                  "tv"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "bedroom",
+                "synonyms": [
+                  "upstairs"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "everywhere",
+                "synonyms": [
+                  "all rooms",
+                  "whole house"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "alexa_skill_id": "amzn1.ask.skill.paste-your-skill-id-here",
+  "default_room": "Living Room",
+  "rooms": {
+    "Living Room": {
+      "aliases": [
+        "living room",
+        "lounge",
+        "front room",
+        "tv"
+      ],
+      "ip": ""
+    },
+    "Bedroom": {
+      "aliases": [
+        "bedroom",
+        "upstairs"
+      ],
+      "ip": ""
+    }
+  },
+  "device_rooms": {},
+  "playlist_name": "Carrot",
+  "max_tracks": 30,
+  "port": 5005
+}

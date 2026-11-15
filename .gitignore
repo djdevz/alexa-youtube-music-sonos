@@ -1,0 +1,12 @@
+# Secrets: never commit these
+config.json
+browser.json
+headers.txt
+tokens.json
+templates.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
