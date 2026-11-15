@@ -6,6 +6,7 @@
   python cli.py play "adele in the bedroom" play something, exactly as Alexa would
   python cli.py search "bruno mars"        show what would be queued, without playing
   python cli.py devices                    show Alexa devices that need a room mapping
+  python cli.py secret [--new]             show (or create/replace) the secret endpoint path
 """
 import logging
 import sys
@@ -99,6 +100,19 @@ def main(argv):
         for d in unmapped:
             print(f'"{d}": "<Room name>",')
         print("\nPaste these under \"device_rooms\" in config.json, set the room, then restart Carrot.")
+        return 0
+
+    if cmd == "secret":
+        import secrets
+        from core import CONFIG_PATH, load_json, save_json
+        raw = load_json(CONFIG_PATH)  # edit the file as-is, without load_config's defaults
+        if "--new" in args or not raw.get("endpoint_secret"):
+            raw["endpoint_secret"] = secrets.token_urlsafe(24)
+            save_json(CONFIG_PATH, raw)
+            print("Saved a new endpoint_secret to config.json.")
+        print(f"\nAlexa console > Build > Endpoint, Default Region URL:\n"
+              f"  https://<your-pi>.<tailnet>.ts.net/{raw['endpoint_secret']}/")
+        print("\nKeep this URL private. Restart Carrot to apply: sudo systemctl restart carrot")
         return 0
 
     print(__doc__)

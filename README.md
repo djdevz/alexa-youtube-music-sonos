@@ -182,11 +182,15 @@ network. That doesn't affect Alexa, which reaches the Pi from Amazon's servers.)
 3. **Build → Interaction Model → JSON Editor**: paste `skill/interaction-model.json`, then **Save**
    and **Build skill**. If you change room names, edit the `ROOM` values near the bottom to match
    your aliases.
-4. **Endpoint**: HTTPS, your Tailscale address, certificate option **"My development endpoint has a
-   certificate from a trusted certificate authority"**. Save.
-5. Copy the **Skill ID** into `"alexa_skill_id"` in `config.json` on the Pi, then
-   `sudo systemctl restart carrot`. Carrot rejects requests for any other skill ID.
-6. **Test** tab: enable testing in **Development**, type `open carrot`. Carrot should answer.
+4. On the Pi, run `.venv/bin/python cli.py secret`. It saves a random `endpoint_secret` in
+   `config.json` and prints your endpoint URL: your Tailscale address plus `/<secret>/`. Carrot
+   only accepts Alexa requests sent to that path, so **keep the full URL private**.
+5. **Endpoint**: HTTPS, the URL from step 4, certificate option **"My development endpoint has a
+   certificate from a trusted certificate authority"**. Click **Save Endpoints**.
+6. Copy the **Skill ID** into `"alexa_skill_id"` in `config.json` on the Pi, then
+   `sudo systemctl restart carrot`. Carrot rejects requests for any other skill ID, and refuses
+   everything until it's set.
+7. **Test** tab: enable testing in **Development**, type `open carrot`. Carrot should answer.
 
 The skill stays private to your account. You don't need to publish it.
 
@@ -225,6 +229,7 @@ python cli.py signin                sign in to YouTube Music, create the Carrot 
 python cli.py search "bruno mars"   show what would be queued, without playing
 python cli.py play "adele in the bedroom"
 python cli.py devices               Alexa devices that still need a room
+python cli.py secret [--new]        show (or replace) the secret endpoint URL path
 python tests/test_carrot.py         offline tests (fake Sonos + YouTube Music)
 ```
 
@@ -232,7 +237,7 @@ python tests/test_carrot.py         offline tests (fake Sonos + YouTube Music)
 
 | Symptom | Cause / fix |
 |---|---|
-| "There was a problem with the requested skill's response" for everything | Check `journalctl -u carrot -n 20`. "Rejected request for skill …" means `alexa_skill_id` in `config.json` doesn't match. "Rejected stale request" means the Pi's clock is off. |
+| "There was a problem with the requested skill's response" for everything | Check `journalctl -u carrot -n 20`. "Rejected request for skill …" means `alexa_skill_id` in `config.json` doesn't match. "Rejected stale request" means the Pi's clock is off. "Rejected request to wrong path" means the console's endpoint URL doesn't end in `/<endpoint_secret>/` (see it with `cli.py secret`). |
 | An Echo says "playing music from provider Carrot is not supported", or doesn't know the skill | The skill only exists in the locale(s) you built. Set the Echo's language (Alexa app → Devices → device → Language) to match, e.g. English (United Kingdom), or add that locale to the skill. |
 | Sometimes Alexa plays from Spotify/Amazon Music instead | Alexa's own music routing grabbed the request. Unlink unused services under Settings → Music & Podcasts, or say "ask Carrot to **put on** …". |
 | "ask Carrot to pause / stop the music / previous song" does nothing | Alexa reserves some playback phrases for itself and never sends them to the skill. Use "turn it off", "carry on", "skip", "go back". Alexa routines (custom phrase → Customised action `ask carrot to turn it off`) give you short versions. |

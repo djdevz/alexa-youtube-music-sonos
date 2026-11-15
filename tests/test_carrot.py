@@ -18,7 +18,7 @@ from core import EVERYWHERE, Carrot, Resolver, split_room  # noqa: E402
 core.time.sleep = lambda s: None  # no waiting in retries
 
 CFG = json.load(open(os.path.join(ROOT, "config.example.json")))
-CFG["alexa_skill_id"] = ""
+CFG["alexa_skill_id"] = "amzn1.ask.skill.test"
 CFG["device_rooms"] = {"dot-1": "Bedroom"}
 json.dump(CFG, open(os.environ["CARROT_CONFIG"], "w"))
 
@@ -203,7 +203,8 @@ def test_alexa_handler():
     skill = server.Skill(c)
 
     def req(intent, slots=None, device="dot-1"):
-        return {"context": {"System": {"device": {"deviceId": device}}},
+        return {"context": {"System": {"device": {"deviceId": device},
+                                       "application": {"applicationId": "amzn1.ask.skill.test"}}},
                 "request": {"type": "IntentRequest", "intent": {"name": intent, "slots": slots or {}}}}
 
     say = lambda r: r["response"]["outputSpeech"]["text"]
@@ -213,11 +214,23 @@ def test_alexa_handler():
     assert devs["Bedroom"].log == ["pause"]
     skill.handle(req("PreviousIntent", {"room": {"value": "lounge"}}))
     assert devs["Living Room"].log == ["previous"]
-    CFG["alexa_skill_id"] = "amzn1.ask.skill.real"
-    try:
-        assert skill.handle(req("PlayIntent", {"query": {"value": "x"}})) is None
-    finally:
-        CFG["alexa_skill_id"] = ""
+    # wrong, missing or placeholder skill ID: refused
+    for bad in ("amzn1.ask.skill.real", "", "amzn1.ask.skill.paste-your-skill-id-here", "amzn1.ask.skill.xxxx-1"):
+        CFG["alexa_skill_id"] = bad
+        try:
+            assert skill.handle(req("PlayIntent", {"query": {"value": "x"}})) is None, bad
+        finally:
+            CFG["alexa_skill_id"] = "amzn1.ask.skill.test"
+
+
+def test_endpoint_secret():
+    cfg = {}
+    assert server.path_ok(cfg, "/") and server.path_ok(cfg, "/anything")  # no secret: old behaviour
+    cfg["endpoint_secret"] = "s3cret-Path_1"
+    for good in ("/s3cret-Path_1", "/s3cret-Path_1/", "/s3cret-Path_1/?x=1"):
+        assert server.path_ok(cfg, good), good
+    for bad in ("/", "", "/s3cret", "/s3cret-Path_1x", "/other/s3cret-Path_1", "/S3CRET-PATH_1"):
+        assert not server.path_ok(cfg, bad), bad
 
 
 if __name__ == "__main__":

@@ -27,10 +27,11 @@ Alexa through Tailscale Funnel (HTTPS → 127.0.0.1:5005).
   top songs, album, playlist, mood/genre → playlist via `MOOD` regex, with fallbacks),
   `GoBetween` (the Carrot playlist), `Sonos` (SoCo wrapper, favourites browse FV:2),
   `Carrot` (play / control orchestration).
-- `server.py`: stdlib HTTP server for the Alexa endpoint. Validates skill ID + timestamp, maps
+- `server.py`: stdlib HTTP server for the Alexa endpoint. Requires POSTs on `/<endpoint_secret>/`
+  (when set; `cli.py secret` makes one), refuses an unset skill ID, validates skill ID + timestamp, maps
   `deviceId` → room via `config.json` `device_rooms`, answers within ~6s (work continues in a
   thread if slow).
-- `cli.py`: `rooms`, `favourites`, `signin`, `search`, `play`, `devices`.
+- `cli.py`: `rooms`, `favourites`, `signin`, `search`, `play`, `devices`, `secret`.
 - `skill/interaction-model.json`: paste into the Alexa console's JSON editor, then Build.
 - `deploy/carrot.service`: systemd unit (user `pi`, `/home/pi/carrot`, `.venv`).
 - `refresh-signin.bat`: Windows: clipboard cURL → `cli.py signin` → scp `browser.json` → restart.

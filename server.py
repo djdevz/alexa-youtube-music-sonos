@@ -1,4 +1,5 @@
 """Alexa skill endpoint for Carrot. Run: python server.py"""
+import hmac
 import json
 import logging
 import threading
@@ -12,6 +13,21 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger("carrot")
 
 ANSWER_WITHIN = 6.0  # Alexa gives us ~8s; answer before then even if Sonos is slow
+MAX_BODY = 64 * 1024  # real Alexa requests are a few KB
+
+
+def skill_id_set(skill_id):
+    """False for a missing or placeholder skill ID (we refuse all requests until it's set)."""
+    return bool(skill_id) and not skill_id.startswith("amzn1.ask.skill.xxxx") and "paste-your" not in skill_id
+
+
+def path_ok(cfg, path):
+    """POSTs must go to /<endpoint_secret>/ when a secret is configured."""
+    secret = cfg.get("endpoint_secret") or ""
+    if not secret:
+        return True
+    given = path.split("?", 1)[0].strip("/")
+    return hmac.compare_digest(given.encode(), secret.encode())
 
 
 def speak(text, end=True, reprompt=None):
@@ -31,7 +47,10 @@ class Skill:
         skill_id = self.cfg.get("alexa_skill_id", "")
         app = ((body.get("context") or {}).get("System") or {}).get("application") or \
               (body.get("session") or {}).get("application") or {}
-        if skill_id and not skill_id.startswith("amzn1.ask.skill.xxxx") and app.get("applicationId") != skill_id:
+        if not skill_id_set(skill_id):
+            log.warning("Rejected request: set alexa_skill_id in config.json (Alexa console > Build > Skill ID)")
+            return False
+        if app.get("applicationId") != skill_id:
             log.warning("Rejected request for skill %s", app.get("applicationId"))
             return False
         ts = (body.get("request") or {}).get("timestamp")
@@ -171,8 +190,13 @@ def make_handler(skill):
 
         def do_POST(self):
             started = time.time()
+            if not path_ok(skill.cfg, self.path):
+                log.warning("Rejected request to wrong path (check endpoint_secret and the Alexa console endpoint URL)")
+                return self._send(403, {"error": "forbidden"})
             try:
                 length = int(self.headers.get("Content-Length", 0))
+                if length > MAX_BODY:
+                    return self._send(413, {"error": "too large"})
                 body = json.loads(self.rfile.read(length) or b"{}")
             except Exception:
                 return self._send(400, {"error": "bad json"})
@@ -193,6 +217,10 @@ def main():
     port = carrot.cfg["port"]
     srv = ThreadingHTTPServer(("127.0.0.1", port), make_handler(skill))
     log.info("Carrot listening on http://127.0.0.1:%s", port)
+    if not carrot.cfg.get("endpoint_secret"):
+        log.warning("No endpoint_secret set: anyone who finds your URL can send requests. Run: cli.py secret")
+    if not skill_id_set(carrot.cfg.get("alexa_skill_id", "")):
+        log.warning("alexa_skill_id isn't set in config.json: all Alexa requests will be refused")
     srv.serve_forever()
 
 
